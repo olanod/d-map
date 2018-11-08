@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="mapbox-token" content="pk.eyJ1Ijoib2xhbm9kIiwiYSI6IjdZdV9iTTQifQ.HP-razZKsNmITPgHs4ugIA">
+  <title>Map</title>
+  <script type="module" src="map.js" async></script>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    :not(:defined) { opacity: 0; }
+    do-map { height: 100%; }
+  </style>
+</head>
+
+<body>
+  <do-map zoom="2"></do-map>
+
+  <script type="module">
+    import { Marker } from './map.js'
+    // demo functionality, show markers taken from the URL query parameters
+    const params = new URL(location).searchParams
+    const markers = params.getAll('m')
+      .map(m => m.split(';'))
+      .map(([title, ...lngLat]) => Object.assign(new Marker, { title, lngLat }))
+    const map = document.querySelector('do-map')
+    map.append(...markers)
+    const zoom = parseInt(params.get('z'))
+    if (zoom) map.zoom = zoom
+  </script>
+</body>
+
+</html>
