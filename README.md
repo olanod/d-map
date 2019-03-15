@@ -7,7 +7,7 @@ Mapbox GL map as a custom element. This simple wrapper allows creating maps with
 <!-- import -->
 <script type="module" src="map.js"></script>
 <!-- use -->
-<d-map c="13.4 52.5">
-  <d-marker c="13.4;52.5"></d-marker>
+<d-map c="13.4 52.5" z="6">
+  <d-marker c="13.4 52.5"></d-marker>
 </d-map>
 ```
