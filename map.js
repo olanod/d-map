@@ -4,6 +4,7 @@ const mbxJS = `https://api.tiles.mapbox.com/mapbox-gl-js/${mbxVer}/mapbox-gl.js`
 const mbxCSS = `https://api.tiles.mapbox.com/mapbox-gl-js/${mbxVer}/mapbox-gl.css`
 const mbxStyle = 'mapbox://styles/mapbox/streets-v9'
 const mbxToken = document.head.querySelector('meta[name=mapbox-token]').content
+const $new = (tag, props) => Object.assign(document.createElement(tag), props)
 
 ;(async () => {
 	await loadMapbox(mbxJS, mbxToken)
@@ -24,25 +25,17 @@ export class Map extends HTMLElement {
 		this._center = parseCoords(this.getAttribute('c'))
 		this._zoom = +this.getAttribute('z') || 0
 
-		const css = document.createElement('style')
+		this.attachShadow({ mode: 'open' })
+		const css = $new('style')
 		css.append(document.createTextNode(`:host {display: block}
 #map {height: 100%; width: 100%;}`))
-
-		const mcss = document.createElement('link')
-		mcss.rel = 'stylesheet'
-		mcss.href = mbxCSS
-
-		const map = document.createElement('div')
-		map.id = 'map'
-		Object.defineProperty(this, '$map', { value: map })
-
-		this.attachShadow({ mode: 'open' })
-		this.shadowRoot.append(mcss, css, map)
+		const mcss = $new('link', { rel: 'stylesheet', href: mbxCSS })
+		this.shadowRoot.append(mcss, css, $new('div', { id: 'map' }))
 	}
 
 	connectedCallback() {
 		this[mapbox] = new mapboxgl.Map({
-			container: this.$map,
+			container: this.shadowRoot.lastElementChild,
 			style: mbxStyle,
 			center: this._center,
 			zoom: this._zoom,
@@ -58,7 +51,6 @@ export class Map extends HTMLElement {
 	set center(val) { this.set('center', val) }
 }
 
-
 /**
  * Marker
  */
@@ -71,20 +63,22 @@ export class Marker extends HTMLElement {
 	}
 
 	async connectedCallback() {
-		this[mapbox] = new mapboxgl.Marker().setLngLat(this._lngLat)
+		this[mapbox] = new mapboxgl.Marker()
 		this.lngLat = this._lngLat
 		const map = this.closest(Map.tag)
 		if (map) this[mapbox].addTo(map[mapbox])
 	}
 
 	get lngLat() { return this._lngLat }
-	set lngLat([lng, lat]) { setProp(this, 'lngLat', [lng || 0, lat || 0]) }
+	set lngLat([lng, lat]) { setProp(this, 'lngLat', [+lng || 0, +lat || 0]) }
 }
 
 function setProp(self, prop, val) {
 	self[`_${prop}`] = val
-	prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-	self[mapbox][`set${prop}`](val)
+	if (self[mapbox]) {
+		prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+		self[mapbox][`set${prop}`](val)
+	}
 }
 
 function parseCoords(str) {
@@ -94,7 +88,7 @@ function parseCoords(str) {
 
 async function loadMapbox(jsURL, token) {
 	await new Promise((res, rej) => {
-		const script = document.createElement('script')
+		const script = $new('script')
 		script.onload = res
 		script.src = jsURL
 		document.head.append(script)
