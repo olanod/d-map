@@ -13,6 +13,8 @@
 	console.info(`Try loading this page with one or more 'm' query parameters.
 Usage: ?m=<title>;<lng>;<lat>
 `)
+	const getLocation = () => fetch('https://ipapi.co/json', {mode: 'cors'})
+	.then(r => r.json()).then(({latitude, longitude}) => [longitude, latitude])
 
 	const {searchParams} = new URL(location)
 	customElements.whenDefined('d-marker')
@@ -25,10 +27,6 @@ Usage: ?m=<title>;<lng>;<lat>
 		const zoom = +searchParams.get('z')
     		if (zoom) map.zoom = zoom
 	})
-	async function getLocation() {
-		return fetch('https://ipapi.co/json', {mode: 'cors'})
-			.then(r => r.json()).then(({latitude, longitude}) => [longitude, latitude])
-	}
 	</script>
 	<style>
 	html, body { margin: 0; padding: 0; height: 100%; }
@@ -38,7 +36,7 @@ Usage: ?m=<title>;<lng>;<lat>
 </head>
 
 <body>
-  <d-map z="3"></d-map>
+	<d-map z="3"></d-map>
 </body>
 
 </html>
