@@ -26,8 +26,8 @@ Usage: ?m=<title>;<lng>;<lat>
     		if (zoom) map.zoom = zoom
 	})
 	async function getLocation() {
-		return fetch('http://ip-api.com/json', {mode: 'cors'})
-			.then(r => r.json()).then(({lat, lon}) => [lon, lat])
+		return fetch('https://ipapi.co/json', {mode: 'cors'})
+			.then(r => r.json()).then(({latitude, longitude}) => [longitude, latitude])
 	}
 	</script>
 	<style>
