@@ -8,31 +8,32 @@
 	<meta name="mapbox-token" content="pk.eyJ1Ijoib2xhbm9kIiwiYSI6IjdZdV9iTTQifQ.HP-razZKsNmITPgHs4ugIA">
 	<title>Map</title>
 	<script type="module">
+	// demo functionality, show markers taken from the URL query parameters
 	import { Marker } from './map.js'
-    console.info(`Try loading this page with one or more 'm' query parameters.
+	console.info(`Try loading this page with one or more 'm' query parameters.
 Usage: ?m=<title>;<lng>;<lat>
 `)
-    // demo functionality, show markers taken from the URL query parameters
-    const {searchParams} = new URL(location)
+
+	const {searchParams} = new URL(location)
 	customElements.whenDefined('d-marker')
-    	.then(() => params.getAll('m').map(m => m.split(';')))
+    	.then(() => searchParams.getAll('m').map(m => m.split(';')))
     	.then(mm => mm.map(([title, ...lngLat]) => Object.assign(new Marker, { title, lngLat })))
-		.then(async mks => {
-			const map = document.querySelector('d-map')
-			map.append(...mks)
-			map.center = mks.length ? mks[0].lngLat : await getLocation()
-			const zoom = +searchParams.get('z')
+	.then(async mks => {
+		const map = document.querySelector('d-map')
+		map.append(...mks)
+		map.center = mks.length ? mks[0].lngLat : await getLocation()
+		const zoom = +searchParams.get('z')
     		if (zoom) map.zoom = zoom
-		})
+	})
 	async function getLocation() {
 		return fetch('http://ip-api.com/json', {mode: 'cors'})
 			.then(r => r.json()).then(({lat, lon}) => [lon, lat])
 	}
 	</script>
 	<style>
-    html, body { margin: 0; padding: 0; height: 100%; }
-    :not(:defined) { opacity: 0; }
-    d-map { height: 100%; }
+	html, body { margin: 0; padding: 0; height: 100%; }
+	:not(:defined) { opacity: 0; }
+	d-map { height: 100%; }
 	</style>
 </head>
 
