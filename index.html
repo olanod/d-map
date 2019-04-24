@@ -2,33 +2,38 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="mapbox-token" content="pk.eyJ1Ijoib2xhbm9kIiwiYSI6IjdZdV9iTTQifQ.HP-razZKsNmITPgHs4ugIA">
-  <title>Map</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="mapbox-token" content="pk.eyJ1Ijoib2xhbm9kIiwiYSI6IjdZdV9iTTQifQ.HP-razZKsNmITPgHs4ugIA">
+	<title>Map</title>
 	<script type="module">
-		import { Marker } from './map.js'
+	import { Marker } from './map.js'
     console.info(`Try loading this page with one or more 'm' query parameters.
 Usage: ?m=<title>;<lng>;<lat>
 `)
     // demo functionality, show markers taken from the URL query parameters
-    const params = new URL(location).searchParams
-		customElements.whenDefined('d-marker')
+    const {searchParams} = new URL(location)
+	customElements.whenDefined('d-marker')
     	.then(() => params.getAll('m').map(m => m.split(';')))
-      .then(mm => mm.map(([title, ...lngLat]) => Object.assign(new Marker, { title, lngLat })))
-			.then(mks => {
-				const map = document.querySelector('d-map')
-				map.append(...mks)
-				const zoom = parseInt(params.get('z'))
+    	.then(mm => mm.map(([title, ...lngLat]) => Object.assign(new Marker, { title, lngLat })))
+		.then(async mks => {
+			const map = document.querySelector('d-map')
+			map.append(...mks)
+			map.center = mks.length ? mks[0].lngLat : await getLocation()
+			const zoom = +searchParams.get('z')
     		if (zoom) map.zoom = zoom
-			})
+		})
+	async function getLocation() {
+		return fetch('http://ip-api.com/json', {mode: 'cors'})
+			.then(r => r.json()).then(({lat, lon}) => [lon, lat])
+	}
 	</script>
-  <style>
+	<style>
     html, body { margin: 0; padding: 0; height: 100%; }
     :not(:defined) { opacity: 0; }
     d-map { height: 100%; }
-  </style>
+	</style>
 </head>
 
 <body>
